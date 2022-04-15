@@ -1,21 +1,20 @@
 package com.lucasvinicius.datastructures.array;
 
-import java.util.Arrays;
-
 /**
- * Implementation of our own Dynamic Array Data Structure
+ * Generic Dynamic Array Implementation
  * 
  * <p>
  * An array is a collection of items stored at contiguous memory locations. 
  * The idea is to store multiple items of the same type together.
- * >> https://www.geeksforgeeks.org/array-data-structure/
- * 
  * The simple array in java cannot be used dynamically. For example. 
  * We have int[] array = new int[5]; this array can store only 5 elements,
  * its size cannot be changed in the future.
  * 
  * If you want an array which can be used dynamically you can use ArrayList in Java.
  *
+ * @see <a href="https://www.geeksforgeeks.org/array-data-structure">Array (GeeksforGeeks)</a>
+ * @see <a href="https://en.wikipedia.org/wiki/Dynamic_array">Dynamic Array (Wikipedia)</a>
+ * <br>
  * @author Lucas Vinicius, lucasvinicius.lv010@gmail.com
  */
 
@@ -69,12 +68,12 @@ public class DynamicArray<T> {
 
 	public void add(int index, T elem) {
 		checkIfTheIndexIsAvailable(index);
-
 		if (size == capacity) {
 			resize(size + 1);
 		}
-
-		System.arraycopy(data, index, data, index + 1, size - index);
+		for (int i = size; i > index; i--) {
+			data[i] = data[i-1];
+		}
 		data[index] = elem;
 		size++;
 	}
@@ -82,7 +81,9 @@ public class DynamicArray<T> {
 	public T removeAt(int index) {
 		checkIfTheIndexIsInUse(index);
 		T removed = data[index];
-		System.arraycopy(data, index + 1, data, index, size - (index + 1));
+		for (int i = index; i < size - 1; i++) {
+			data[i] = data[i+1];
+		}
 		data[--size] = null;
 		shrink();
 		return removed;
@@ -90,11 +91,9 @@ public class DynamicArray<T> {
 
 	public boolean remove(T elem) {
 		int index = indexOf(elem);
-
 		if (index < 0) {
 			return false;
 		}
-
 		removeAt(index);
 		return true;
 	}
@@ -110,7 +109,9 @@ public class DynamicArray<T> {
 
 	public void clear() {
 		if (size > 0) {
-			Arrays.fill(data, 0, size, null);
+			for (int i = 0; i < size; i++) {
+				data[i] = null;
+			}
 			size = 0;
 		}
 	}
@@ -118,16 +119,16 @@ public class DynamicArray<T> {
 	private void resize(int minCapacity) {
 		if (minCapacity > capacity) {
 			capacity = Math.max(minCapacity, capacity * 2);
-			T[] new_array = newElementArray(capacity);
-			System.arraycopy(data, 0, new_array, 0, size);
-			data = new_array;
+			T[] newArray = newElementArray(capacity);
+			System.arraycopy(data, 0, newArray, 0, size);
+			data = newArray;
 			
 		}
 	}
 
 	private void shrink() {
 		if (capacity / 2 > size) {
-			int new_capacity = capacity / 2;
+			int new_capacity = capacity >> 1;
 			T[] new_array = newElementArray(new_capacity);
 			System.arraycopy(data, 0, new_array, 0, size);
 			data = new_array;
@@ -153,20 +154,15 @@ public class DynamicArray<T> {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-
 		sb.append("[");
-
 		for (int i = 0; i < size - 1; i++) {
 			sb.append(data[i]);
 			sb.append(", ");
 		}
-
 		if (size > 0) {
 			sb.append(data[size - 1]);
 		}
-
 		sb.append("]");
-
 		return sb.toString();
 	}
 	
